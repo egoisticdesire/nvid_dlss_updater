@@ -1,0 +1,13 @@
+Brotli==1.0.9
+colorama==0.4.6
+inflate64==0.3.1
+multivolumefile==0.2.3
+pip3-autoremove==0.10.2
+psutil==5.9.5
+py7zr==0.20.5
+pybcj==1.0.1
+pycryptodomex==3.18.0
+pyppmd==1.0.0
+pyzstd==0.15.7
+rarfile==4.0
+texttable==1.6.7
