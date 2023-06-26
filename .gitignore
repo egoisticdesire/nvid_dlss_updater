@@ -1,10 +1,33 @@
-.idea
-*__pycache__*
+# Виртуальные окружения и папки с зависимостями
+venv/
+env/
+env.bak/
+__pycache__/
 *.pyc
 *.pyo
-*.DS_Store
-scratches
-venv
-.env
+*.pyd
+
+# Файлы настроек IDE
+.idea/
+.vscode/
+
+# Файлы логов и отчетов
 *.log
-*.pot
+*version*
+
+# Кэшированные файлы
+.cached/
+*.cache
+
+# Файлы секретных ключей, паролей и конфиденциальной информации
+.secret
+.env
+
+# Папки с результатами сборки и временными файлами
+build/
+dist/
+*.egg-info/
+
+# Прочее
+.wdm/
+scratches/

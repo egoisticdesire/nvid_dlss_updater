@@ -1,12 +1,13 @@
+import colorama
 import os
 import shutil
-from colorama import init
 
-from extractor import get_data_from_archive
-from variables import (DEFAULT_DOWNLOADED_FILES_PATH, DEFAULT_FILENAME, DEFAULT_ROOT_DIRECTORY, DEFAULT_ZIP_FILENAME,
-                       F_BLUE, F_RED, F_YELLOW, S_RESET)
+from scripts.downloader import check_temp_files_exist, get_data_from_site
+from scripts.extractor import get_data_from_archive
+from variables import (DEFAULT_DOWNLOADED_FILES_PATH, DEFAULT_FILENAME, DEFAULT_ROOT_DIRECTORY, DEFAULT_URL,
+                       DEFAULT_ZIP_FILENAME, F_BLUE, F_RED, F_YELLOW, S_RESET)
 
-init(autoreset=True)
+colorama.init(autoreset=True)
 
 
 def find_and_copy_file(root_directory, downloaded_files_directory, filename):
@@ -26,13 +27,17 @@ def find_and_copy_file(root_directory, downloaded_files_directory, filename):
 
             replacement_file_path = os.path.join(downloaded_files_directory, f'{file}.{extension}')
             shutil.copy2(replacement_file_path, original_file_path)
-            print(f'Старый файл заменен\n')
+            print('Старый файл заменен\n')
 
 
 def main():
     try:
+        get_data_from_site(DEFAULT_URL)
         get_data_from_archive(DEFAULT_DOWNLOADED_FILES_PATH, DEFAULT_ZIP_FILENAME, DEFAULT_FILENAME)
         find_and_copy_file(DEFAULT_ROOT_DIRECTORY, DEFAULT_DOWNLOADED_FILES_PATH, DEFAULT_FILENAME)
+
+        check_temp_files_exist(DEFAULT_DOWNLOADED_FILES_PATH)
+
     except FileNotFoundError:
         print(
             f'Пожалуйста проверьте данные:\n{F_RED}'
