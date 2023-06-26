@@ -1,6 +1,4 @@
 import colorama
-import py7zr
-import rarfile
 import time
 import zipfile
 
