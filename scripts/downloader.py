@@ -10,15 +10,15 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
-from variables import (DEFAULT_DOWNLOADED_FILES_PATH, DEFAULT_URL, DEFAULT_WEBDRIVER_PATH, DEFAULT_OPTIONS, F_BLUE,
-                       F_GREEN, S_RESET)
+from variables import (DEFAULT_DOWNLOAD_PATH, DEFAULT_URL, DEFAULT_WEBDRIVER_PATH,
+                       DEFAULT_OPTIONS, F_BLUE, F_GREEN, S_RESET)
 
 colorama.init(autoreset=True)
 
 
-def get_user_choice(ver):
+def get_user_choice(ver: str):
     while True:
-        answer = input(f'Текущая версия {F_BLUE}{ver}{S_RESET} является актуальной. Продолжить? (Y/n): ')
+        answer = input(f'Текущая версия {F_BLUE}{ver.upper()}{S_RESET} является актуальной. Продолжить? (Y/n): ')
         if answer.lower() == 'n':
             print('\nОбновление не требуется\nВыполнение программы остановлено пользователем')
             exit(0)
@@ -27,18 +27,23 @@ def get_user_choice(ver):
             return
 
 
-def check_version(version, filename='.\\nvid_dlss_version.json'):
-    if not os.path.exists(filename) or os.path.getsize(filename) == 0:
-        with open(filename, 'w', encoding='utf-8') as file:
-            data = {"title": ""}
-            json.dump(data, file, indent=4, ensure_ascii=False)
+def check_temp_files_exist(download_path):
+    temp_file_pattern = '*.tmp'
+    temp_files = glob.glob(os.path.join(download_path, temp_file_pattern))
+    for temp_file in temp_files:
+        os.remove(temp_file)
 
+
+def check_version(version, zip_filename, filename='.\\meta.json'):
+    version = version.lower()
+    zip_filename = zip_filename.lower()
     with open(filename, 'r', encoding='utf-8') as file:
         data = json.load(file)
 
-    if data.get('title') != version:
+    if data.get('title') != version or data.get('zip_filename') != zip_filename:
         print('\nЗагрузка файла...')
         data['title'] = version
+        data['zip_filename'] = zip_filename
         with open(filename, 'w', encoding='utf-8') as file:
             json.dump(data, file, indent=4, ensure_ascii=False)
     else:
@@ -57,13 +62,6 @@ def check_file_download_status(download_path, download_file, wait_time=60, file_
 
     if file_exists:
         print(f'Файл успешно загружен: {F_GREEN}{download_fullpath}\n')
-
-
-def check_temp_files_exist(download_path):
-    temp_file_pattern = '*.tmp'
-    temp_files = glob.glob(os.path.join(download_path, temp_file_pattern))
-    for temp_file in temp_files:
-        os.remove(temp_file)
 
 
 def set_chrome_webdriver_options(options):
@@ -107,7 +105,7 @@ def get_data_from_site(url, max_retries=3):
                         value='filename',
                     ).text.strip()
 
-                    check_version(latest_version_title)
+                    check_version(latest_version_title, latest_version_filename)
 
                     latest_version.find_element(
                         by=By.CLASS_NAME,
@@ -119,7 +117,7 @@ def get_data_from_site(url, max_retries=3):
                         value='closest',
                     ).click()
 
-                    check_file_download_status(DEFAULT_DOWNLOADED_FILES_PATH, latest_version_filename)
+                    check_file_download_status(DEFAULT_DOWNLOAD_PATH, latest_version_filename)
 
                     break
                 except NoSuchElementException:

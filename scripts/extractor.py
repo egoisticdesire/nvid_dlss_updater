@@ -2,7 +2,7 @@ import colorama
 import time
 import zipfile
 
-from variables import (DEFAULT_DOWNLOADED_FILES_PATH, DEFAULT_FILENAME, DEFAULT_ZIP_FILENAME, F_BLUE, F_GREEN)
+from variables import (DEFAULT_DOWNLOAD_PATH, DEFAULT_FILENAME, DEFAULT_ZIP_FILENAME, F_BLUE, F_GREEN)
 
 colorama.init(autoreset=True)
 
@@ -10,7 +10,6 @@ colorama.init(autoreset=True)
 def get_data_from_archive(zip_path, zip_filename, filename):
     print(f'Выбранный архив: {F_BLUE}{zip_filename}')
     print(f'Выбранный путь для извлечения: {F_GREEN}{zip_path}\n')
-    # time.sleep(3)
     with zipfile.ZipFile(f'{zip_path + zip_filename}', 'r') as zipf:
         # zipf.extractall(zip_path)
         file_list = zipf.namelist()
@@ -24,7 +23,7 @@ def get_data_from_archive(zip_path, zip_filename, filename):
 
 
 def main():
-    get_data_from_archive(DEFAULT_DOWNLOADED_FILES_PATH, DEFAULT_ZIP_FILENAME, DEFAULT_FILENAME)
+    get_data_from_archive(DEFAULT_DOWNLOAD_PATH, DEFAULT_ZIP_FILENAME, DEFAULT_FILENAME)
 
 
 if __name__ == '__main__':

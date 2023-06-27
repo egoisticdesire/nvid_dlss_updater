@@ -2,35 +2,41 @@ import colorama
 import os
 import shutil
 
-from variables import (DEFAULT_DOWNLOADED_FILES_PATH, DEFAULT_FILENAME, DEFAULT_ROOT_DIRECTORY, F_BLUE, F_YELLOW,
-                       S_RESET)
+from variables import (DEFAULT_DOWNLOAD_PATH, DEFAULT_FILENAME, DEFAULT_ROOT_PATH, F_BLUE, F_YELLOW, S_RESET)
 
 colorama.init(autoreset=True)
 
 
-def find_and_copy_file(root_directory, downloaded_files_directory, filename):
-    file, extension = filename.split('.')
-    copy_suffix = ' — копия'
+class FileFinder:
+    def __init__(self, start_directory, download_path, filename):
+        self.root_path = start_directory
+        self.download_path = download_path
+        self.filename = filename
+        self.name, self.extension = filename.split('.')
+        self.copy_filename = f'{self.name} — копия.{self.extension}'
 
-    for root, dirs, files in os.walk(root_directory):
-        if f'{file}.{extension}' in files:
-            print(f'Файл {F_BLUE}{file}.{extension}{S_RESET} найден в каталоге {F_BLUE}{root}')
+    def find_file(self):
+        for root, dirs, files in os.walk(self.root_path):
+            if self.filename in files:
+                print(f'Файл {F_BLUE}{self.filename}{S_RESET} найден в каталоге {F_BLUE}{root}')
+                self.check_and_create_copy(root, self.filename, self.copy_filename)
+                self.replace_file(root, self.filename)
 
-            original_file_path = os.path.join(root, f'{file}.{extension}')
-            copy_file_path = os.path.join(root, f'{file}{copy_suffix}.{extension}')
+    @staticmethod
+    def check_and_create_copy(root_path, orig_filename, copy_filename):
+        copy_file_path = os.path.join(root_path, copy_filename)
+        orig_file_path = os.path.join(root_path, orig_filename)
+        if not os.path.exists(copy_file_path):
+            shutil.copy2(orig_file_path, copy_file_path)
+            print(f'Создана копия файла: {F_YELLOW}{copy_file_path}')
 
-            if not os.path.exists(f'{root}\\{file}{copy_suffix}.{extension}'):
-                shutil.copy2(original_file_path, copy_file_path)
-                print(f'Создана копия файла: {F_YELLOW}{copy_file_path}')
-
-            replacement_file_path = os.path.join(downloaded_files_directory, f'{file}.{extension}')
-            shutil.copy2(replacement_file_path, original_file_path)
-            print('Старый файл заменен\n')
-
-
-def main():
-    find_and_copy_file(DEFAULT_ROOT_DIRECTORY, DEFAULT_DOWNLOADED_FILES_PATH, DEFAULT_FILENAME)
+    def replace_file(self, root_path, filename):
+        orig_file_path = os.path.join(root_path, filename)
+        replacement_file_path = os.path.join(self.download_path, filename)
+        shutil.copy2(replacement_file_path, orig_file_path)
+        print('Старый файл заменен\n')
 
 
 if __name__ == '__main__':
-    main()
+    finder = FileFinder(DEFAULT_ROOT_PATH, DEFAULT_DOWNLOAD_PATH, DEFAULT_FILENAME)
+    finder.find_file()
