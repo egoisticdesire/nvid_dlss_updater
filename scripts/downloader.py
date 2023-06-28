@@ -1,9 +1,8 @@
-import colorama
-import glob
 import json
 import os
 import time
 
+import colorama
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -25,13 +24,6 @@ def get_user_choice(ver: str):
         elif answer.lower() == 'y' or answer == '':
             print('\nЗагрузка файла...')
             return
-
-
-def check_temp_files_exist(download_path):
-    temp_file_pattern = '*.tmp'
-    temp_files = glob.glob(os.path.join(download_path, temp_file_pattern))
-    for temp_file in temp_files:
-        os.remove(temp_file)
 
 
 def check_version(version, zip_filename, filename='.\\meta.json'):
