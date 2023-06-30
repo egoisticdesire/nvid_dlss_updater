@@ -9,7 +9,12 @@ colorama.init(autoreset=True)
 
 
 class Extractor:
-    def __init__(self, zip_path, zip_filename, filename):
+    def __init__(
+        self,
+        zip_path=DEFAULT_DOWNLOAD_PATH,
+        zip_filename=DEFAULT_ZIP_FILENAME,
+        filename=DEFAULT_FILENAME
+    ):
         self.zip_path = zip_path
         self.zip_filename = zip_filename
         self.filename = filename
@@ -32,5 +37,5 @@ class Extractor:
 
 
 if __name__ == '__main__':
-    extractor = Extractor(DEFAULT_DOWNLOAD_PATH, DEFAULT_ZIP_FILENAME, DEFAULT_FILENAME)
+    extractor = Extractor()
     extractor.get_data_from_archive()

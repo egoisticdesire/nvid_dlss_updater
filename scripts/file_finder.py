@@ -9,7 +9,12 @@ colorama.init(autoreset=True)
 
 
 class FileFinder:
-    def __init__(self, start_directory, download_path, filename):
+    def __init__(
+        self,
+        start_directory=DEFAULT_ROOT_PATH,
+        download_path=DEFAULT_DOWNLOAD_PATH,
+        filename=DEFAULT_FILENAME
+    ):
         self.start_directory = start_directory
         self.download_path = download_path
         self.filename = filename
@@ -28,16 +33,16 @@ class FileFinder:
         copy_file_path = os.path.join(root_path, copy_filename)
         orig_file_path = os.path.join(root_path, orig_filename)
         if not os.path.exists(copy_file_path):
-            # shutil.copy2(orig_file_path, copy_file_path)
+            shutil.copy2(orig_file_path, copy_file_path)
             print(f'Создана копия файла: {F_YELLOW}{copy_file_path}')
 
     def _replace_file(self, root_path, filename):
         orig_file_path = os.path.join(root_path, filename)
         replacement_file_path = os.path.join(self.download_path, filename)
-        # shutil.copy2(replacement_file_path, orig_file_path)
+        shutil.copy2(replacement_file_path, orig_file_path)
         print('Старый файл заменен\n')
 
 
 if __name__ == '__main__':
-    finder = FileFinder(DEFAULT_ROOT_PATH, DEFAULT_DOWNLOAD_PATH, DEFAULT_FILENAME)
+    finder = FileFinder()
     finder.find_file()

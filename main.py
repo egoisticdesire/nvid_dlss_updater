@@ -3,10 +3,10 @@ import os
 
 import colorama
 
-from scripts.downloader import get_data_from_site
+from scripts.downloader import Downloader
 from scripts.extractor import Extractor
 from scripts.file_finder import FileFinder
-from utils import clearing_temp_files
+from utility import clearing_temp_files
 from variables import (DEFAULT_DOWNLOAD_PATH, DEFAULT_FILENAME, DEFAULT_ROOT_PATH,
                        DEFAULT_URL, DEFAULT_WEBDRIVER_PATH, DEFAULT_ZIP_FILENAME, F_RED)
 
@@ -24,12 +24,14 @@ def check_metadata(filename='.\\meta.json'):
 
 
 def main():
-    finder = FileFinder(DEFAULT_ROOT_PATH, DEFAULT_DOWNLOAD_PATH, DEFAULT_FILENAME)
-    extractor = Extractor(DEFAULT_DOWNLOAD_PATH, DEFAULT_ZIP_FILENAME, DEFAULT_FILENAME)
+    downloader = Downloader()
+    extractor = Extractor()
+    finder = FileFinder()
+
     try:
         check_metadata()
 
-        get_data_from_site(DEFAULT_URL)
+        downloader.get_data_from_site()
         extractor.get_data_from_archive()
         finder.find_file()
 
@@ -39,9 +41,11 @@ def main():
             f'\t{DEFAULT_ROOT_PATH=}\n'
             f'\t{DEFAULT_DOWNLOAD_PATH=}\n'
             f'\t{DEFAULT_WEBDRIVER_PATH=}\n'
+            f'\t{DEFAULT_URL=}\n'
             f'\t{DEFAULT_FILENAME=}\n'
             f'\t{DEFAULT_ZIP_FILENAME=}\n'
         )
+
     finally:
         clearing_temp_files(DEFAULT_DOWNLOAD_PATH)
 
