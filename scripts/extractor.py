@@ -3,18 +3,14 @@ import zipfile
 
 import colorama
 
-from variables import (DEFAULT_DOWNLOAD_PATH, DEFAULT_FILENAME, DEFAULT_ZIP_FILENAME, F_BLUE, F_GREEN)
+from scripts.utility import Meta
+from variables import F_BLUE, F_GREEN
 
 colorama.init(autoreset=True)
 
 
 class Extractor:
-    def __init__(
-        self,
-        zip_path=DEFAULT_DOWNLOAD_PATH,
-        zip_filename=DEFAULT_ZIP_FILENAME,
-        filename=DEFAULT_FILENAME
-    ):
+    def __init__(self, zip_path, zip_filename, filename):
         self.zip_path = zip_path
         self.zip_filename = zip_filename
         self.filename = filename
@@ -37,5 +33,7 @@ class Extractor:
 
 
 if __name__ == '__main__':
-    extractor = Extractor()
+    meta = Meta()
+    config = meta.create_metadata()
+    extractor = Extractor(config['download_path'], config['zip_filename'], config['dll_filename'])
     extractor.get_data_from_archive()

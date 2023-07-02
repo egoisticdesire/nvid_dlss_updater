@@ -1,53 +1,55 @@
-import json
-import os
-
 import colorama
 
 from scripts.downloader import Downloader
 from scripts.extractor import Extractor
 from scripts.file_finder import FileFinder
-from utility import clearing_temp_files
-from variables import (DEFAULT_DOWNLOAD_PATH, DEFAULT_FILENAME, DEFAULT_ROOT_PATH,
-                       DEFAULT_URL, DEFAULT_WEBDRIVER_PATH, DEFAULT_ZIP_FILENAME, F_RED)
+from scripts.utility import clearing_temp_files, Meta
+from variables import F_RED
 
 colorama.init(autoreset=True)
 
 
-def check_metadata(filename='.\\meta.json'):
-    if not os.path.exists(filename) or os.path.getsize(filename) == 0:
-        with open(filename, 'w', encoding='utf-8') as file:
-            template = {
-                "title": "",
-                "zip_filename": ""
-            }
-            json.dump(template, file, indent=4, ensure_ascii=False)
-
-
 def main():
-    downloader = Downloader()
-    extractor = Extractor()
-    finder = FileFinder()
+    meta = Meta()
+    config = meta.create_metadata()
 
     try:
-        check_metadata()
+        downloader = Downloader(
+            config['webdriver_path'],
+            config['options'],
+            config['download_path'],
+        )
+        config = meta.update_metadata(
+            *downloader.get_data_from_site(config['url'])
+        )
 
-        downloader.get_data_from_site()
+        extractor = Extractor(
+            config['download_path'],
+            config['zip_filename'],
+            config['dll_filename'],
+        )
         extractor.get_data_from_archive()
+
+        finder = FileFinder(
+            config['root_path'],
+            config['download_path'],
+            config['dll_filename'],
+        )
         finder.find_file()
 
     except FileNotFoundError:
         print(
-            f'Пожалуйста проверьте данные:\n{F_RED}'
-            f'\t{DEFAULT_ROOT_PATH=}\n'
-            f'\t{DEFAULT_DOWNLOAD_PATH=}\n'
-            f'\t{DEFAULT_WEBDRIVER_PATH=}\n'
-            f'\t{DEFAULT_URL=}\n'
-            f'\t{DEFAULT_FILENAME=}\n'
-            f'\t{DEFAULT_ZIP_FILENAME=}\n'
+            f"Пожалуйста проверьте данные:\n{F_RED}"
+            f"\troot_path = {config['root_path']}\n"
+            f"\tdownload_path = {config['download_path']}\n"
+            f"\twebdriver_path = {config['webdriver_path']}\n"
+            f"\turl = {config['url']}\n"
+            f"\tdll_filename = {config['dll_filename']}\n"
+            f"\tzip_filename = {config['zip_filename']}\n"
         )
 
     finally:
-        clearing_temp_files(DEFAULT_DOWNLOAD_PATH)
+        clearing_temp_files(config['download_path'])
 
 
 if __name__ == '__main__':

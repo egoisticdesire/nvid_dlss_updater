@@ -3,18 +3,14 @@ import shutil
 
 import colorama
 
-from variables import (DEFAULT_DOWNLOAD_PATH, DEFAULT_FILENAME, DEFAULT_ROOT_PATH, F_BLUE, F_YELLOW, S_RESET)
+from scripts.utility import Meta
+from variables import F_BLUE, F_YELLOW, S_RESET
 
 colorama.init(autoreset=True)
 
 
 class FileFinder:
-    def __init__(
-        self,
-        start_directory=DEFAULT_ROOT_PATH,
-        download_path=DEFAULT_DOWNLOAD_PATH,
-        filename=DEFAULT_FILENAME
-    ):
+    def __init__(self, start_directory, download_path, filename):
         self.start_directory = start_directory
         self.download_path = download_path
         self.filename = filename
@@ -44,5 +40,7 @@ class FileFinder:
 
 
 if __name__ == '__main__':
-    finder = FileFinder()
+    meta = Meta()
+    config = meta.create_metadata()
+    finder = FileFinder(config['root_path'], config['download_path'], config['dll_filename'])
     finder.find_file()

@@ -28,6 +28,9 @@ build/
 dist/
 *.egg-info/
 
+# Конфигурационные файлы
+meta.json
+
 # Прочее
 .wdm/
 scratches/
