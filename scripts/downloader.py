@@ -64,7 +64,8 @@ class Downloader:
 
                         break
                     except NoSuchElementException:
-                        print('Элемент не найден')
+                        print('Элемент не найден, страница обновлена')
+                        time.sleep(1)
                         driver.refresh()
                         retry_count += 1
 
@@ -91,23 +92,23 @@ class Downloader:
                 chrome_options.add_argument(f'{key}={value}')
         return chrome_options
 
-    def _check_version(self, version, zip_filename, filename=DEFAULT_META):
+    def _check_version(self, version, zip_filename, meta_filename=DEFAULT_META):
         version = version.lower()
         zip_filename = zip_filename.lower()
-        with open(filename, 'r', encoding='utf-8') as file:
+        with open(meta_filename, 'r', encoding='utf-8') as file:
             data = json.load(file)
 
         if data['title'] != version or data['zip_filename'] != zip_filename:
             print('\nЗагрузка файла...')
             data['title'] = version
             data['zip_filename'] = zip_filename
-            with open(filename, 'w', encoding='utf-8') as file:
+            with open(meta_filename, 'w', encoding='utf-8') as file:
                 json.dump(data, file, indent=4, ensure_ascii=False)
         else:
             self._get_user_choice(timeout=False, ver=data['title'])
 
-    def _check_file_download_status(self, download_file, wait_time=60, file_exists=False):
-        download_fullpath = os.path.join(self.download_path, download_file)
+    def _check_file_download_status(self, downloaded_file, wait_time=60, file_exists=False):
+        download_fullpath = os.path.join(self.download_path, downloaded_file)
 
         while wait_time > 0:
             if os.path.exists(download_fullpath):
@@ -120,13 +121,12 @@ class Downloader:
                 wait_time = self._get_user_choice(timeout=True)
 
         if file_exists:
-            print(f'Файл успешно загружен: {F_GREEN}{download_fullpath}\n')
+            print(f'Файл успешно загружен: {F_GREEN}[{download_fullpath}]\n')
 
     @staticmethod
     def _get_user_choice(timeout: bool, ver: str = ''):
         while True:
-            # Возможно тут можно сделать красивее (много похожих строк), но мне показалось,
-            # что иначе будет еще большее нагромождение условий и станет менее читаемо
+            # Возможно тут можно сделать красивее (много похожих строк)
             if timeout:
                 answer = input('Время ожидания превышено\nФайл не загружен, подождать? (Y/n): ')
                 if answer.lower() == 'n':

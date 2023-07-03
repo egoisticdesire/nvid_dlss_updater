@@ -10,19 +10,26 @@ colorama.init(autoreset=True)
 
 
 class FileFinder:
-    def __init__(self, start_directory, download_path, filename):
+    def __init__(self, start_directory, download_path, dll_filename):
         self.start_directory = start_directory
         self.download_path = download_path
-        self.filename = filename
-        self.name, self.extension = filename.split('.')
+        self.dll_filename = dll_filename
+        self.name, self.extension = dll_filename.split('.')
         self.copy_filename = f'{self.name} — копия.{self.extension}'
 
     def find_file(self):
+        if not os.path.exists(self.start_directory):
+            print(f'Выбранного каталога {F_BLUE}[{self.start_directory}]{S_RESET} не существует')
         for root, dirs, files in os.walk(self.start_directory):
-            if self.filename in files:
-                print(f'Файл {F_BLUE}{self.filename}{S_RESET} найден в каталоге {F_BLUE}{root}')
-                self._check_and_create_copy(root, self.filename, self.copy_filename)
-                self._replace_file(root, self.filename)
+            if self.dll_filename in files:
+                print(f'Файл {F_BLUE}{self.dll_filename}{S_RESET} найден в каталоге {F_BLUE}[{root}]')
+                self._check_and_create_copy(root, self.dll_filename, self.copy_filename)
+                self._replace_file(root, self.dll_filename)
+        else:
+            print(
+                f'По указанному пути {F_BLUE}[{self.start_directory}]{S_RESET} '
+                f'не найдено ни одного файла {F_BLUE}{self.dll_filename}'
+            )
 
     @staticmethod
     def _check_and_create_copy(root_path, orig_filename, copy_filename):
@@ -30,7 +37,7 @@ class FileFinder:
         orig_file_path = os.path.join(root_path, orig_filename)
         if not os.path.exists(copy_file_path):
             shutil.copy2(orig_file_path, copy_file_path)
-            print(f'Создана копия файла: {F_YELLOW}{copy_file_path}')
+            print(f'Создана копия файла: {F_YELLOW}[{copy_file_path}]')
 
     def _replace_file(self, root_path, filename):
         orig_file_path = os.path.join(root_path, filename)
