@@ -21,7 +21,6 @@ class Meta:
                     'dll_filename': '',
                     'root_path': '',
                     'download_path': '',
-                    'webdriver_path': '',
                     'url': '',
                     'options': {}
                 }
@@ -41,9 +40,6 @@ class Meta:
             config = json.load(metafile)
             config['root_path'] = root_path
             config['download_path'] = download_path
-            config['webdriver_path'] = webdriver_path
-            # Имя файла, ссылка и опции браузера всегда одинаковые,
-            # за исключением запуска браузера в безголовом режиме
             config['dll_filename'] = 'nvngx_dlss.dll'
             config['url'] = 'https://www.techpowerup.com/download/nvidia-dlss-dll/'
             config['options'] = {

@@ -15,7 +15,6 @@ def main():
 
     try:
         downloader = Downloader(
-            config['webdriver_path'],
             config['options'],
             config['download_path'],
         )
@@ -42,7 +41,6 @@ def main():
             f"Пожалуйста проверьте данные:\n{F_RED}"
             f"\troot_path = {config['root_path']}\n"
             f"\tdownload_path = {config['download_path']}\n"
-            f"\twebdriver_path = {config['webdriver_path']}\n"
             f"\turl = {config['url']}\n"
             f"\tdll_filename = {config['dll_filename']}\n"
             f"\tzip_filename = {config['zip_filename']}\n"

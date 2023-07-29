@@ -17,8 +17,7 @@ colorama.init(autoreset=True)
 
 
 class Downloader:
-    def __init__(self, webdriver_path, webdriver_options, download_path):
-        self.webdriver_path = webdriver_path
+    def __init__(self, webdriver_options, download_path):
         self.webdriver_options = webdriver_options
         self.download_path = download_path
 
@@ -78,7 +77,7 @@ class Downloader:
         return latest_version_title, latest_version_filename
 
     def _start_chrome_webdriver(self):
-        chrome_service = ChromeService(ChromeDriverManager(path=self.webdriver_path).install())
+        chrome_service = ChromeService(ChromeDriverManager().install())
         chrome_options = self._set_chrome_webdriver_options()
         return webdriver.Chrome(service=chrome_service, options=chrome_options)
 
