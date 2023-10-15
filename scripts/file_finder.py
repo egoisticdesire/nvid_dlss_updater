@@ -22,7 +22,7 @@ class FileFinder:
             print(f'Выбранного каталога {F_BLUE}[{self.start_directory}]{S_RESET} не существует')
         for root, dirs, files in os.walk(self.start_directory):
             if self.dll_filename in files:
-                print(f'Файл {F_BLUE}{self.dll_filename}{S_RESET} найден в каталоге {F_BLUE}[{root}]')
+                print(f'Файл {F_BLUE}{self.dll_filename}{S_RESET} найден в каталоге {F_YELLOW}[{root}\\]')
                 self._check_and_create_copy(root, self.dll_filename, self.copy_filename)
                 self._replace_file(root, self.dll_filename)
         else:
@@ -37,13 +37,13 @@ class FileFinder:
         copy_file_path = os.path.join(root_path, copy_filename)
         orig_file_path = os.path.join(root_path, orig_filename)
         if not os.path.exists(copy_file_path):
-            # shutil.copy2(orig_file_path, copy_file_path)
+            shutil.copy2(orig_file_path, copy_file_path)
             print(f'Создана копия файла: {F_YELLOW}[{copy_file_path}]')
 
     def _replace_file(self, root_path, filename):
         orig_file_path = os.path.join(root_path, filename)
         replacement_file_path = os.path.join(self.download_path, filename)
-        # shutil.copy2(replacement_file_path, orig_file_path)
+        shutil.copy2(replacement_file_path, orig_file_path)
         print('Старый файл заменен\n')
 
 

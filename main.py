@@ -47,7 +47,13 @@ def main():
         )
 
     finally:
-        clearing_temp_files(config['download_path'])
+        clearing_temp_files(
+            config['download_path'],
+            config['zip_filename'],
+            config['dll_filename'],
+            '*.tmp',
+            '*.crdownload',
+        )
 
 
 if __name__ == '__main__':

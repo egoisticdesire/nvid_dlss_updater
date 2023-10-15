@@ -1,5 +1,5 @@
 import glob
-import json
+import ujson
 import os
 
 from fake_useragent import UserAgent
@@ -24,20 +24,15 @@ class Meta:
                     'url': '',
                     'options': {}
                 }
-                json.dump(template, metafile, indent=4, ensure_ascii=False)
+                ujson.dump(template, metafile, indent=4, ensure_ascii=False)
 
         games_folder = 'D:\\GAMES\\'
-        return self._add_config_to_metadata(root_path=games_folder, headless=False)
+        downloads_folder = os.path.expandvars('%USERPROFILE%\\Downloads\\')
+        return self._add_config_to_metadata(root_path=games_folder, download_path=downloads_folder)
 
-    def _add_config_to_metadata(
-        self,
-        root_path='C:\\GAMES\\',
-        download_path=os.path.expandvars('%USERPROFILE%\\Downloads\\'),
-        webdriver_path='.\\scripts',
-        headless=True,
-    ):
+    def _add_config_to_metadata(self, root_path, download_path, headless=True):
         with open(self.filename, 'r', encoding='utf-8') as metafile:
-            config = json.load(metafile)
+            config = ujson.load(metafile)
             config['root_path'] = root_path
             config['download_path'] = download_path
             config['dll_filename'] = 'nvngx_dlss.dll'
@@ -50,7 +45,7 @@ class Meta:
             }
 
         with open(self.filename, 'w', encoding='utf-8') as metafile:
-            json.dump(config, metafile, indent=4, ensure_ascii=False)
+            ujson.dump(config, metafile, indent=4, ensure_ascii=False)
         return config
 
     def update_metadata(self, title, zip_filename):
@@ -59,8 +54,17 @@ class Meta:
         return self.data
 
 
-def clearing_temp_files(download_path):
-    temp_file_pattern = ['*.tmp', '*.crdownload']
+# def get_games_folder():
+#     while True:
+#         disk = input('Укажите букву диска, на котором хранятся игры: ')
+#         if disk.isalpha() and disk.isascii() and len(disk) == 1:
+#             folder = input('Из какой папки брать игры?\n')
+#             return f'{disk}:\\{folder}'.strip()
+#         else:
+#             print('Это не может быть буквой диска!\n')
+
+
+def clearing_temp_files(download_path, *temp_file_pattern):
     for file in temp_file_pattern:
         temp_files = glob.glob(os.path.join(download_path, file))
 

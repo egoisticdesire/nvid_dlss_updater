@@ -1,4 +1,4 @@
-import json
+import ujson
 import os
 import time
 
@@ -95,14 +95,14 @@ class Downloader:
         version = version.lower()
         zip_filename = zip_filename.lower()
         with open(meta_filename, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+            data = ujson.load(file)
 
         if data['title'] != version or data['zip_filename'] != zip_filename:
             print('\nЗагрузка файла...')
             data['title'] = version
             data['zip_filename'] = zip_filename
             with open(meta_filename, 'w', encoding='utf-8') as file:
-                json.dump(data, file, indent=4, ensure_ascii=False)
+                ujson.dump(data, file, indent=4, ensure_ascii=False)
         else:
             self._get_user_choice(timeout=False, ver=data['title'])
 
@@ -135,6 +135,8 @@ class Downloader:
                     print('\nПродолжается загрузка файла...\n')
                     wait_time = 60
                     return wait_time
+                else:
+                    print('Неизвестная команда!\n')
 
             answer = input(f'Текущая версия {F_BLUE}{ver.upper()}{S_RESET} является актуальной. Продолжить? (Y/n): ')
             if answer.lower() == 'n':
@@ -143,10 +145,12 @@ class Downloader:
             elif answer.lower() == 'y' or answer == '':
                 print('\nЗагрузка файла...')
                 break
+            else:
+                print('Неизвестная команда!\n')
 
 
 if __name__ == '__main__':
     meta = Meta()
     config = meta.create_metadata()
-    downloader = Downloader(config['webdriver_path'], config['options'], config['download_path'])
+    downloader = Downloader(config['options'], config['download_path'])
     downloader.get_data_from_site(config['url'])
