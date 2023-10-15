@@ -1,3 +1,5 @@
+import os
+
 from colorama import Fore, Style
 
 F_BLUE = Fore.BLUE
@@ -7,3 +9,5 @@ F_YELLOW = Fore.YELLOW
 S_RESET = Style.RESET_ALL
 
 DEFAULT_META = '.\\meta.json'
+GAMES_FOLDER = 'D:\\GAMES\\'
+DOWNLOADS_FOLDER = os.path.expandvars('%USERPROFILE%\\Downloads\\')

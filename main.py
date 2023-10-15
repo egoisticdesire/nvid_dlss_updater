@@ -38,7 +38,7 @@ def main():
 
     except FileNotFoundError:
         print(
-            f"Пожалуйста проверьте данные:\n{F_RED}"
+            f"Проверьте данные:\n{F_RED}"
             f"\troot_path = {config['root_path']}\n"
             f"\tdownload_path = {config['download_path']}\n"
             f"\turl = {config['url']}\n"

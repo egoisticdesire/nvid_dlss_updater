@@ -4,7 +4,7 @@ import os
 
 from fake_useragent import UserAgent
 
-from variables import DEFAULT_META
+from variables import DEFAULT_META, DOWNLOADS_FOLDER, GAMES_FOLDER
 
 
 class Meta:
@@ -26,8 +26,8 @@ class Meta:
                 }
                 ujson.dump(template, metafile, indent=4, ensure_ascii=False)
 
-        games_folder = 'D:\\GAMES\\'
-        downloads_folder = os.path.expandvars('%USERPROFILE%\\Downloads\\')
+        games_folder = GAMES_FOLDER
+        downloads_folder = DOWNLOADS_FOLDER
         return self._add_config_to_metadata(root_path=games_folder, download_path=downloads_folder)
 
     def _add_config_to_metadata(self, root_path, download_path, headless=True):
