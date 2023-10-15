@@ -54,6 +54,7 @@ def main():
             '*.tmp',
             '*.crdownload',
         )
+        input('Нажмите любую кнопку для выхода...')
 
 
 if __name__ == '__main__':
