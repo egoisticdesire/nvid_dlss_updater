@@ -7,7 +7,7 @@
 ### Варианты использования:
 1) Загрузить исполняемый файл со страницы [Releases](https://github.com/egoisticdesire/nvid_dlss_updater/releases/tag/1.0);
 
-2) Запустить команды (Windows):
+2) Запустить команды:
 ```python
 git clone https://github.com/egoisticdesire/nvid_dlss_updater.git;
 cd nvid_dlss_updater;
