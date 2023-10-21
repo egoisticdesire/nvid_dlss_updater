@@ -17,8 +17,8 @@ class Extractor:
         self.zip_fullpath = os.path.join(self.zip_path, self.zip_filename)
 
     def get_data_from_archive(self):
-        print(f'Выбранный архив: {F_BLUE}{self.zip_filename}')
-        print(f'Выбранный путь для извлечения: {F_GREEN}[{self.zip_path}]\n')
+        # print(f'Выбранный архив: {F_BLUE}{self.zip_filename}')
+        # print(f'Выбранный путь для извлечения: {F_GREEN}[{self.zip_path}]\n')
         if not os.path.exists(self.zip_fullpath):
             raise FileNotFoundError(f'Архив {self.zip_filename} не найден по указанному пути {self.zip_path}\n')
 

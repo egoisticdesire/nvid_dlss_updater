@@ -4,7 +4,16 @@ import os
 
 from fake_useragent import UserAgent
 
-from variables import DEFAULT_META, DOWNLOADS_FOLDER, GAMES_FOLDER
+from variables import (DEFAULT_DLL_FILENAME,
+                       DEFAULT_DOWNLOADS_FOLDER,
+                       DEFAULT_GAMES_FOLDER,
+                       DEFAULT_META,
+                       DEFAULT_URL,
+                       F_GREEN,
+                       F_RED,
+                       GAMES_FOLDER_REQUESTED,
+                       HEADLESS_MODE_REQUESTED,
+                       S_RESET)
 
 
 class Meta:
@@ -26,42 +35,75 @@ class Meta:
                 }
                 ujson.dump(template, metafile, indent=4, ensure_ascii=False)
 
-        games_folder = GAMES_FOLDER
-        downloads_folder = DOWNLOADS_FOLDER
-        return self._add_config_to_metadata(root_path=games_folder, download_path=downloads_folder)
-
-    def _add_config_to_metadata(self, root_path, download_path, headless=True):
-        with open(self.filename, 'r', encoding='utf-8') as metafile:
-            config = ujson.load(metafile)
-            config['root_path'] = root_path
-            config['download_path'] = download_path
-            config['dll_filename'] = 'nvngx_dlss.dll'
-            config['url'] = 'https://www.techpowerup.com/download/nvidia-dlss-dll/'
-            config['options'] = {
-                'accept': '*/*',
-                'user-agent': UserAgent().random,
-                'disable-blink-features': 'AutomationControlled',
-                'headless=new': headless
-            }
-
-        with open(self.filename, 'w', encoding='utf-8') as metafile:
-            ujson.dump(config, metafile, indent=4, ensure_ascii=False)
-        return config
+        return self._add_config_to_metadata()
 
     def update_metadata(self, title, zip_filename):
         self.data['title'] = title
         self.data['zip_filename'] = zip_filename
         return self.data
 
+    def _add_config_to_metadata(self):
+        global GAMES_FOLDER_REQUESTED
+        global HEADLESS_MODE_REQUESTED
 
-# def get_games_folder():
-#     while True:
-#         disk = input('Укажите букву диска, на котором хранятся игры: ')
-#         if disk.isalpha() and disk.isascii() and len(disk) == 1:
-#             folder = input('Из какой папки брать игры?\n')
-#             return f'{disk}:\\{folder}'.strip()
-#         else:
-#             print('Это не может быть буквой диска!\n')
+        with open(self.filename, 'r', encoding='utf-8') as metafile:
+            config = ujson.load(metafile)
+            config['download_path'] = DEFAULT_DOWNLOADS_FOLDER
+            config['dll_filename'] = DEFAULT_DLL_FILENAME
+            config['url'] = DEFAULT_URL
+
+            if not GAMES_FOLDER_REQUESTED:
+                config['root_path'] = get_games_folder()
+                GAMES_FOLDER_REQUESTED = True
+
+            if not HEADLESS_MODE_REQUESTED:
+                config['options'] = {
+                    'accept': '*/*',
+                    'user-agent': UserAgent().random,
+                    'disable-blink-features': 'AutomationControlled',
+                    'headless=new': install_silently()
+                }
+                HEADLESS_MODE_REQUESTED = True
+
+        with open(self.filename, 'w', encoding='utf-8') as metafile:
+            ujson.dump(config, metafile, indent=4, ensure_ascii=False)
+        return config
+
+
+def get_games_folder():
+    count = 3
+    print(f'Для выхода введите "{F_RED}exit{S_RESET}"')
+    while count:
+        disk = input('Укажите букву диска, на котором хранятся игры: ')
+        if disk.isalpha() and disk.isascii() and len(disk) == 1:
+            folder = input('Из какого каталога брать игры (можно оставить поле пустым): ')
+            if folder == 'exit'.lower():
+                print('Выполнение программы остановлено пользователем')
+                exit(0)
+            return f'{disk}:\\{folder}\\'.strip()
+        elif disk == 'exit'.lower():
+            print('Выполнение программы остановлено пользователем')
+            exit(0)
+        else:
+            count -= 1
+            print(f'Это не может быть буквой диска! (Попыток осталось: {count})\n')
+
+    print(f'Установлен путь по-умолчанию: {F_GREEN}[{DEFAULT_GAMES_FOLDER}]{S_RESET}\n')
+    return DEFAULT_GAMES_FOLDER
+
+
+def install_silently():
+    while True:
+        answer = input('По-умолчанию включена "тихая" установка. Продолжить "тихую" установку? (Y/n): ')
+        if answer.lower() == 'y' or answer == '':
+            return True
+        elif answer.lower() == 'n':
+            return False
+        elif answer == 'exit'.lower():
+            print('Выполнение программы остановлено пользователем')
+            exit(0)
+        else:
+            print('Некорректный ввод!\n')
 
 
 def clearing_temp_files(download_path, *temp_file_pattern):

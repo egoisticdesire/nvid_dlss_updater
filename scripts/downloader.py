@@ -104,7 +104,7 @@ class Downloader:
             with open(meta_filename, 'w', encoding='utf-8') as file:
                 ujson.dump(data, file, indent=4, ensure_ascii=False)
         else:
-            self._get_user_choice(timeout=False, ver=data['title'])
+            self._get_user_choice(ver=data['title'])
 
     def _check_file_download_status(self, downloaded_file, wait_time=60, file_exists=False):
         download_fullpath = os.path.join(self.download_path, downloaded_file)
@@ -123,12 +123,11 @@ class Downloader:
             print(f'Файл успешно загружен: {F_GREEN}[{download_fullpath}]\n')
 
     @staticmethod
-    def _get_user_choice(timeout: bool, ver: str = ''):
+    def _get_user_choice(timeout: bool = False, ver: str = ''):
         while True:
-            # Возможно тут можно сделать красивее (много похожих строк)
             if timeout:
                 answer = input('Время ожидания превышено\nФайл не загружен, подождать? (Y/n): ')
-                if answer.lower() == 'n':
+                if answer.lower() == 'n' or answer == 'exit':
                     print('\nЗагрузка прервана\nВыполнение программы остановлено пользователем')
                     exit(0)
                 elif answer.lower() == 'y' or answer == '':
@@ -136,17 +135,17 @@ class Downloader:
                     wait_time = 60
                     return wait_time
                 else:
-                    print('Неизвестная команда!\n')
+                    print('Некорректный ввод\n')
 
-            answer = input(f'Текущая версия {F_BLUE}{ver.upper()}{S_RESET} является актуальной. Продолжить? (Y/n): ')
-            if answer.lower() == 'n':
+            answer = input(f'Текущая версия {F_BLUE}{ver.upper()}{S_RESET} является актуальной. Продолжить? (y/N): ')
+            if answer.lower() == 'n' or answer == 'exit' or answer == '':
                 print('\nОбновление не требуется\nВыполнение программы остановлено пользователем')
                 exit(0)
-            elif answer.lower() == 'y' or answer == '':
+            elif answer.lower() == 'y':
                 print('\nЗагрузка файла...')
                 break
             else:
-                print('Неизвестная команда!\n')
+                print('\nНекорректный ввод!\n')
 
 
 if __name__ == '__main__':

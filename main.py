@@ -47,15 +47,29 @@ def main():
         )
 
     finally:
-        clearing_temp_files(
-            config['download_path'],
-            config['zip_filename'],
-            config['dll_filename'],
-            '*.tmp',
-            '*.crdownload',
-        )
-        input('Нажмите любую кнопку для выхода...')
+        answer = input('Удалить загруженные файлы? (y/N): ')
+        if answer.lower() == 'n' or answer == '':
+            clearing_temp_files(
+                config['download_path'],
+                '*.tmp',
+                '*.crdownload',
+            )
+        elif answer.lower() == 'y':
+            clearing_temp_files(
+                config['download_path'],
+                config['zip_filename'],
+                config['dll_filename'],
+                '*.tmp',
+                '*.crdownload',
+            )
+        else:
+            print('Некорректный ввод!')
+
+        input('\nНажмите любую кнопку для выхода...')
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except (ValueError, KeyboardInterrupt):
+        pass
