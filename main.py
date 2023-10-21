@@ -47,23 +47,11 @@ def main():
         )
 
     finally:
-        answer = input('Удалить загруженные файлы? (y/N): ')
-        if answer.lower() == 'n' or answer == '':
-            clearing_temp_files(
-                config['download_path'],
-                '*.tmp',
-                '*.crdownload',
-            )
-        elif answer.lower() == 'y':
-            clearing_temp_files(
-                config['download_path'],
-                config['zip_filename'],
-                config['dll_filename'],
-                '*.tmp',
-                '*.crdownload',
-            )
-        else:
-            print('Некорректный ввод!')
+        clearing_temp_files(
+            config['download_path'],
+            '*.tmp',
+            '*.crdownload',
+        )
 
         input('\nНажмите Enter для выхода...')
 

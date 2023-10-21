@@ -1,4 +1,6 @@
 import glob
+import sys
+
 import ujson
 import os
 
@@ -77,13 +79,15 @@ def get_games_folder():
         disk = input('Укажите букву диска, на котором хранятся игры: ')
         if disk.isalpha() and disk.isascii() and len(disk) == 1:
             folder = input('Из какого каталога брать игры (можно оставить поле пустым): ')
-            if folder == 'exit'.lower():
+            if folder.lower() == 'exit':
                 print('Выполнение программы остановлено пользователем')
-                exit(0)
-            return f'{disk}:\\{folder}\\'.strip()
-        elif disk == 'exit'.lower():
+                sys.exit(0)
+            if folder:
+                return f'{disk}:\\{folder}\\'.strip()
+            return f'{disk}:\\'.strip()
+        elif disk.lower() == 'exit':
             print('Выполнение программы остановлено пользователем')
-            exit(0)
+            sys.exit(0)
         else:
             count -= 1
             print(f'Это не может быть буквой диска! (Попыток осталось: {count})\n')
@@ -101,7 +105,7 @@ def install_silently():
             return False
         elif answer == 'exit'.lower():
             print('Выполнение программы остановлено пользователем')
-            exit(0)
+            sys.exit(0)
         else:
             print('Некорректный ввод!\n')
 

@@ -1,3 +1,5 @@
+import sys
+
 import ujson
 import os
 import time
@@ -127,9 +129,9 @@ class Downloader:
         while True:
             if timeout:
                 answer = input('Время ожидания превышено\nФайл не загружен, подождать? (Y/n): ')
-                if answer.lower() == 'n' or answer == 'exit':
+                if answer.lower() == 'n' or answer.lower() == 'exit':
                     print('\nЗагрузка прервана\nВыполнение программы остановлено пользователем')
-                    exit(0)
+                    sys.exit(0)
                 elif answer.lower() == 'y' or answer == '':
                     print('\nПродолжается загрузка файла...\n')
                     wait_time = 60
@@ -138,9 +140,9 @@ class Downloader:
                     print('Некорректный ввод\n')
 
             answer = input(f'Текущая версия {F_BLUE}{ver.upper()}{S_RESET} является актуальной. Продолжить? (y/N): ')
-            if answer.lower() == 'n' or answer == 'exit' or answer == '':
+            if answer.lower() == 'n' or answer.lower() == 'exit' or answer == '':
                 print('\nОбновление не требуется\nВыполнение программы остановлено пользователем')
-                exit(0)
+                sys.exit(0)
             elif answer.lower() == 'y':
                 print('\nЗагрузка файла...')
                 break
