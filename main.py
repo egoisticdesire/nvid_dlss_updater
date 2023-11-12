@@ -19,7 +19,7 @@ def main():
             config['download_path'],
         )
         config = meta.update_metadata(
-            *downloader.get_data_from_site(config['url'])
+            *downloader.get_data(config['url'])
         )
 
         extractor = Extractor(
