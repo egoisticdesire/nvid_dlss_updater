@@ -1,5 +1,6 @@
 import glob
 import sys
+from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 import psutil
@@ -128,6 +129,15 @@ def get_filepath_prompts_console(drive: str) -> str:
     )
     path_validator = PathValidator(is_dir=True, message='Invalid directory path')
 
+    def normalize_directory_path(drive: str, path: str) -> str:
+        full_path = Path(drive) / path
+        normalized_path = str(full_path.resolve())
+
+        if not normalized_path.endswith('\\'):
+            normalized_path += '\\'
+
+        return normalized_path
+
     return inquirer.filepath(
         message='Выберите директорию: ',
         qmark='',
@@ -136,8 +146,8 @@ def get_filepath_prompts_console(drive: str) -> str:
         instruction='<Tab> для переключения \n     ',
         validate=path_validator,
         only_directories=True,
-        filter=lambda path: f'{path}\\' if len(path) > len(drive) else path,
-        transformer=lambda path: f'{path}\\' if len(path) > len(drive) else path,
+        filter=lambda path: normalize_directory_path(drive, path),
+        transformer=lambda path: normalize_directory_path(drive, path),
         default=drive,
     ).execute()
 
