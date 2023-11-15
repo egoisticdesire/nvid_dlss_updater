@@ -1,10 +1,16 @@
 import glob
 import sys
+from typing import Callable, List, Optional, Union
 
+import psutil
 import ujson
 import os
 
 from fake_useragent import UserAgent
+from InquirerPy import get_style, inquirer
+from InquirerPy.base import Choice
+from InquirerPy.validator import PathValidator
+from rich import print
 
 from variables import (DEFAULT_DLL_FILENAME,
                        DEFAULT_DOWNLOADS_FOLDER,
@@ -62,8 +68,9 @@ class Meta:
                 config['options'] = {
                     'accept': '*/*',
                     'user-agent': UserAgent().random,
+                    'log-level': 3,
                     'disable-blink-features': 'AutomationControlled',
-                    'headless=new': install_silently()
+                    'headless=new': set_silent_mode()
                 }
                 HEADLESS_MODE_REQUESTED = True
 
@@ -72,52 +79,93 @@ class Meta:
         return config
 
 
-def get_games_folder():
-    count = 3
-    print(f'Для выхода введите "{F_RED}exit{S_RESET}"')
-    while count:
-        disk = input('Укажите букву диска, на котором хранятся игры: ')
-        if disk.isalpha() and disk.isascii() and len(disk) == 1:
-            folder = input('Из какого каталога брать игры (можно оставить поле пустым): ')
-            if folder.lower() == 'exit':
-                print('Выполнение программы остановлено пользователем')
-                sys.exit(0)
-            if folder:
-                return f'{disk}:\\{folder}\\'.strip()
-            return f'{disk}:\\'.strip()
-        elif disk.lower() == 'exit':
-            print('Выполнение программы остановлено пользователем')
-            sys.exit(0)
+def get_games_folder() -> str:
+    if os.name != 'nt':
+        print('Ваша ОС не относится к семейству Windows')
+        sys.exit(0)
+
+    drives = [drive.device for drive in psutil.disk_partitions() if 'cdrom' not in drive.opts]
+    message = 'Выберите диск: '
+    choices = [Choice(value=drive, name=drive) for drive in drives]
+    answer = get_select_prompts_console(choices=choices, message=message, default=drives[0])
+    return get_filepath_prompts_console(answer)
+
+
+def get_select_prompts_console(
+    choices: List[Choice], transformer: Optional[Callable] = None,
+    message: str = '', default: Union[bool, str] = True
+) -> Union[bool, str]:
+    style = get_style(
+        {
+            'pointer': 'fg:#2f6ed0',
+            'answer': 'fg:#e5c07b',
+            'instruction': 'fg:#595f6c italic',
+            'validator': 'fg:#000 bg:#6a4077',
+        }, style_override=False
+    )
+
+    return inquirer.select(
+        message=message,
+        qmark='',
+        amark='',
+        pointer='   ➜ ',
+        style=style,
+        instruction='<Tab> для переключения ',
+        choices=choices,
+        transformer=transformer,
+        default=default,
+    ).execute()
+
+
+def get_filepath_prompts_console(drive: str) -> str:
+    style = get_style(
+        {
+            'answer': 'fg:#e5c07b',
+            'input': 'fg:#e5c07b',
+            'instruction': 'fg:#595f6c italic',
+            'validator': 'fg:#000 bg:#6a4077 blink'
+        }, style_override=False
+    )
+    path_validator = PathValidator(is_dir=True, message='Invalid directory path')
+
+    return inquirer.filepath(
+        message='Выберите директорию: ',
+        qmark='',
+        amark='',
+        style=style,
+        instruction='<Tab> для переключения \n     ',
+        validate=path_validator,
+        only_directories=True,
+        filter=lambda path: f'{path}\\' if len(path) > len(drive) else path,
+        transformer=lambda path: f'{path}\\' if len(path) > len(drive) else path,
+        default=drive,
+    ).execute()
+
+
+def set_silent_mode() -> bool:
+    message = 'Хотите продолжить "тихую" установку? '
+    choices_items = {'Да': True, 'Нет': False, 'Выход': None}
+    choices = [Choice(value=value, name=key) for key, value in choices_items.items()]
+
+    def transformer(result: str) -> str:
+        res = result.lower()
+        if res == 'выход':
+            return 'Выполнение прервано пользователем'
+        elif res == 'да':
+            return 'Включена "тихая" установка'
         else:
-            count -= 1
-            print(f'Это не может быть буквой диска! (Попыток осталось: {count})\n')
+            return 'Отключена "тихая" установка'
 
-    print(f'Установлен путь по-умолчанию: {F_GREEN}[{DEFAULT_GAMES_FOLDER}]{S_RESET}\n')
-    return DEFAULT_GAMES_FOLDER
+    answer = get_select_prompts_console(choices=choices, transformer=transformer, message=message)
 
-
-def install_silently():
-    while True:
-        answer = input('По-умолчанию включена "тихая" установка. Продолжить "тихую" установку? (Y/n): ')
-        if answer.lower() == 'y' or answer == '':
-            return True
-        elif answer.lower() == 'n':
-            return False
-        elif answer == 'exit'.lower():
-            print('Выполнение программы остановлено пользователем')
-            sys.exit(0)
-        else:
-            print('Некорректный ввод!\n')
+    if answer is None:
+        sys.exit(0)
+    return answer
 
 
-def clearing_temp_files(download_path, *temp_file_pattern):
-    for file in temp_file_pattern:
+def clearing_temp_files(download_path: str, *temp_file_patterns: str) -> None:
+    for file in temp_file_patterns:
         temp_files = glob.glob(os.path.join(download_path, file))
 
         for temp_file in temp_files:
             os.remove(temp_file)
-
-
-if __name__ == '__main__':
-    meta = Meta()
-    meta.create_metadata()

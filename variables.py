@@ -2,11 +2,11 @@ import os
 
 from colorama import Fore, Style
 
-F_BLUE = Fore.BLUE
-F_GREEN = Fore.GREEN
-F_RED = Fore.RED
-F_YELLOW = Fore.YELLOW
-S_RESET = Style.RESET_ALL
+F_BLUE = '[#2f6ed0]'
+F_GREEN = '[#1cc95a]'
+F_RED = '[#e94e39]'
+F_YELLOW = '[#e5c07b]'
+S_RESET = '[/]'
 
 DEFAULT_META = '.\\meta.json'
 DEFAULT_DLL_FILENAME = 'nvngx_dlss.dll'

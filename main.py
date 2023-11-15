@@ -1,4 +1,5 @@
 import colorama
+from rich import print
 
 from scripts.downloader import Downloader
 from scripts.extractor import Extractor
