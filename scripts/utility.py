@@ -13,86 +13,92 @@ from InquirerPy.base import Choice
 from InquirerPy.validator import PathValidator
 from rich import print
 
-from variables import (DEFAULT_DLL_FILENAME,
+from variables import (CONFIG_TEMPLATE,
+                       DEFAULT_DLSS_FILENAME,
                        DEFAULT_DOWNLOADS_FOLDER,
-                       DEFAULT_GAMES_FOLDER,
-                       DEFAULT_META,
-                       DEFAULT_URL,
-                       F_GREEN,
-                       F_RED,
-                       GAMES_FOLDER_REQUESTED,
-                       HEADLESS_MODE_REQUESTED,
-                       S_RESET)
+                       DEFAULT_META_FILENAME,
+                       DEFAULT_URL)
 
 
 class Meta:
-    def __init__(self, filename=DEFAULT_META):
+    def __init__(self, filename: str = DEFAULT_META_FILENAME):
         self.filename = filename
-        self.data = self.create_metadata()
+        self.config = self.__set_config_data()
 
-    def create_metadata(self):
-        if not os.path.exists(self.filename) or os.path.getsize(self.filename) == 0:
-            with open(self.filename, 'w', encoding='utf-8') as metafile:
-                template = {
-                    'title': '',
-                    'zip_filename': '',
-                    'dll_filename': '',
-                    'root_path': '',
-                    'download_path': '',
-                    'url': '',
-                    'options': {}
-                }
-                ujson.dump(template, metafile, indent=4, ensure_ascii=False)
-
-        return self._add_config_to_metadata()
-
-    def update_metadata(self, title, zip_filename):
-        self.data['title'] = title
-        self.data['zip_filename'] = zip_filename
-        return self.data
-
-    def _add_config_to_metadata(self):
-        global GAMES_FOLDER_REQUESTED
-        global HEADLESS_MODE_REQUESTED
-
-        with open(self.filename, 'r', encoding='utf-8') as metafile:
-            config = ujson.load(metafile)
-            config['download_path'] = DEFAULT_DOWNLOADS_FOLDER
-            config['dll_filename'] = DEFAULT_DLL_FILENAME
-            config['url'] = DEFAULT_URL
-
-            if not GAMES_FOLDER_REQUESTED:
-                config['root_path'] = get_games_folder()
-                GAMES_FOLDER_REQUESTED = True
-
-            if not HEADLESS_MODE_REQUESTED:
-                config['options'] = {
-                    'accept': '*/*',
-                    'user-agent': UserAgent().random,
-                    'log-level': 3,
-                    'disable-blink-features': 'AutomationControlled',
-                    'headless=new': set_silent_mode()
-                }
-                HEADLESS_MODE_REQUESTED = True
-
+    def __save_config_to_file(self, template: bool = False) -> None:
+        if template:
+            self.config = CONFIG_TEMPLATE
         with open(self.filename, 'w', encoding='utf-8') as metafile:
-            ujson.dump(config, metafile, indent=4, ensure_ascii=False)
-        return config
+            ujson.dump(self.config, metafile, indent=4, ensure_ascii=False, escape_forward_slashes=False)
+
+    def __load_config_from_file(self) -> None:
+        with open(self.filename, 'r', encoding='utf-8') as metafile:
+            self.config = ujson.load(metafile)
+
+    def update_config_metadata(self, title: str, zip_filename: str) -> dict:
+        self.config['title'] = title
+        self.config['zip_filename'] = zip_filename
+        return self.config
+
+    def __set_config_data(self):
+        Path(self.filename).touch(exist_ok=True)
+
+        if Path(self.filename).stat().st_size == 0:
+            self.__save_config_to_file(template=True)
+
+        self.__load_config_from_file()
+
+        self.config['download_path'] = DEFAULT_DOWNLOADS_FOLDER
+        self.config['dll_filename'] = DEFAULT_DLSS_FILENAME
+        self.config['url'] = DEFAULT_URL
+        self.config['root_path'] = self.__get_games_folder()
+        self.config['options'] = {
+            'accept': '*/*',
+            'user-agent': UserAgent().random,
+            'log-level': 3,
+            'disable-blink-features': 'AutomationControlled',
+            'headless=new': self.__set_silent_mode()
+        }
+
+        self.__save_config_to_file()
+
+        return self.config
+
+    @staticmethod
+    def __get_games_folder() -> str:
+        if os.name != 'nt':
+            print('Ваша ОС не относится к семейству Windows')
+            sys.exit(0)
+
+        drives = [drive.device for drive in psutil.disk_partitions() if 'cdrom' not in drive.opts]
+        message = 'Выберите диск: '
+        choices = [Choice(value=drive, name=drive) for drive in drives]
+        answer = prompt_choice_selection(choices=choices, message=message, default=drives[0])
+        return prompt_directory_selection(answer)
+
+    @staticmethod
+    def __set_silent_mode() -> bool:
+        message = 'Хотите продолжить "тихую" установку? '
+        choices_items = {'Да': True, 'Нет': False, 'Выход': None}
+        choices = [Choice(value=value, name=key) for key, value in choices_items.items()]
+
+        def transformer(result: str) -> str:
+            res = result.lower()
+            if res == 'выход':
+                return 'Выполнение прервано пользователем'
+            elif res == 'да':
+                return 'Включена "тихая" установка'
+            else:
+                return 'Отключена "тихая" установка'
+
+        answer = prompt_choice_selection(choices=choices, transformer=transformer, message=message)
+
+        if answer is None:
+            sys.exit(0)
+        return answer
 
 
-def get_games_folder() -> str:
-    if os.name != 'nt':
-        print('Ваша ОС не относится к семейству Windows')
-        sys.exit(0)
-
-    drives = [drive.device for drive in psutil.disk_partitions() if 'cdrom' not in drive.opts]
-    message = 'Выберите диск: '
-    choices = [Choice(value=drive, name=drive) for drive in drives]
-    answer = get_select_prompts_console(choices=choices, message=message, default=drives[0])
-    return get_filepath_prompts_console(answer)
-
-
-def get_select_prompts_console(
+def prompt_choice_selection(
     choices: List[Choice], transformer: Optional[Callable] = None,
     message: str = '', default: Union[bool, str] = True
 ) -> Union[bool, str]:
@@ -118,7 +124,7 @@ def get_select_prompts_console(
     ).execute()
 
 
-def get_filepath_prompts_console(drive: str) -> str:
+def prompt_directory_selection(drive: str) -> str:
     style = get_style(
         {
             'answer': 'fg:#e5c07b',
@@ -152,28 +158,7 @@ def get_filepath_prompts_console(drive: str) -> str:
     ).execute()
 
 
-def set_silent_mode() -> bool:
-    message = 'Хотите продолжить "тихую" установку? '
-    choices_items = {'Да': True, 'Нет': False, 'Выход': None}
-    choices = [Choice(value=value, name=key) for key, value in choices_items.items()]
-
-    def transformer(result: str) -> str:
-        res = result.lower()
-        if res == 'выход':
-            return 'Выполнение прервано пользователем'
-        elif res == 'да':
-            return 'Включена "тихая" установка'
-        else:
-            return 'Отключена "тихая" установка'
-
-    answer = get_select_prompts_console(choices=choices, transformer=transformer, message=message)
-
-    if answer is None:
-        sys.exit(0)
-    return answer
-
-
-def clearing_temp_files(download_path: str, *temp_file_patterns: str) -> None:
+def delete_temp_files_by_patterns(download_path: str, *temp_file_patterns: str) -> None:
     for file in temp_file_patterns:
         temp_files = glob.glob(os.path.join(download_path, file))
 

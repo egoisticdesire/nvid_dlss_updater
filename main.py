@@ -1,55 +1,51 @@
-import colorama
 from rich import print
 
 from scripts.downloader import Downloader
 from scripts.extractor import Extractor
 from scripts.file_finder import FileFinder
-from scripts.utility import clearing_temp_files, Meta
+from scripts.utility import delete_temp_files_by_patterns, Meta
 from variables import F_RED
-
-colorama.init(autoreset=True)
 
 
 def main():
     meta = Meta()
-    config = meta.create_metadata()
 
     try:
         downloader = Downloader(
-            config['options'],
-            config['download_path'],
+            meta.config['options'],
+            meta.config['download_path'],
         )
-        config = meta.update_metadata(
-            *downloader.get_data(config['url'])
+        meta.update_config_metadata(
+            *downloader.get_data(meta.config['url'])
         )
 
         extractor = Extractor(
-            config['download_path'],
-            config['zip_filename'],
-            config['dll_filename'],
+            meta.config['download_path'],
+            meta.config['zip_filename'],
+            meta.config['dll_filename'],
         )
         extractor.get_data_from_archive()
 
         finder = FileFinder(
-            config['root_path'],
-            config['download_path'],
-            config['dll_filename'],
+            meta.config['root_path'],
+            meta.config['download_path'],
+            meta.config['dll_filename'],
         )
         finder.find_file()
 
     except FileNotFoundError:
         print(
             f"Проверьте данные:\n{F_RED}"
-            f"\troot_path = {config['root_path']}\n"
-            f"\tdownload_path = {config['download_path']}\n"
-            f"\turl = {config['url']}\n"
-            f"\tdll_filename = {config['dll_filename']}\n"
-            f"\tzip_filename = {config['zip_filename']}\n"
+            f"\troot_path = {meta.config['root_path']}\n"
+            f"\tdownload_path = {meta.config['download_path']}\n"
+            f"\turl = {meta.config['url']}\n"
+            f"\tdll_filename = {meta.config['dll_filename']}\n"
+            f"\tzip_filename = {meta.config['zip_filename']}\n"
         )
 
     finally:
-        clearing_temp_files(
-            config['download_path'],
+        delete_temp_files_by_patterns(
+            meta.config['download_path'],
             '*.tmp',
             '*.crdownload',
         )
