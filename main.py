@@ -3,7 +3,8 @@ from rich import print
 from scripts.downloader import Downloader
 from scripts.extractor import Extractor
 from scripts.file_finder import FileFinder
-from scripts.utility import delete_temp_files_by_patterns, Meta
+from scripts.metadata import Meta
+from scripts.utility import delete_temp_files_by_patterns
 from variables import F_RED
 
 
@@ -44,10 +45,10 @@ def main():
         )
 
     finally:
+        patterns = ['*.tmp', '*.crdownload']
         delete_temp_files_by_patterns(
             meta.config['download_path'],
-            '*.tmp',
-            '*.crdownload',
+            *patterns
         )
 
         input('\nНажмите Enter для выхода...')
