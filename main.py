@@ -1,10 +1,11 @@
+from InquirerPy.base import Choice
 from rich import print
 
 from scripts.downloader import Downloader
 from scripts.extractor import Extractor
 from scripts.file_finder import FileFinder
 from scripts.metadata import Meta
-from scripts.utility import delete_temp_files_by_patterns
+from scripts.utility import delete_temp_files_by_patterns, prompt_choice_selection
 from variables import F_RED
 
 
@@ -46,6 +47,20 @@ def main():
 
     finally:
         patterns = ['*.tmp', '*.crdownload']
+        choices_items = {'Да': True, 'Нет': False}
+        choices = [Choice(value=value, name=key) for key, value in choices_items.items()]
+
+        def transformer(result: str) -> str:
+            if result.lower() == 'да':
+                return 'Удаляются загруженные и временные файлы...'
+            return 'Удаляются только временные файлы...'
+
+        message = '\nУдалить загруженные файлы? '
+        answer = prompt_choice_selection(choices=choices, transformer=transformer, message=message, default=False)
+
+        if answer:
+            patterns.extend([meta.config['dll_filename'], meta.config['zip_filename']])
+
         delete_temp_files_by_patterns(
             meta.config['download_path'],
             *patterns

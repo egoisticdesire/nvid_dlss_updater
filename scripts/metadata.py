@@ -23,10 +23,11 @@ class Meta:
         self.config.update({'title': title, 'zip_filename': zip_filename})
         return self.config
 
-    def __set_config_data(self):
-        Path(self.filename).touch(exist_ok=True)
+    def __set_config_data(self) -> dict:
+        file_path = Path(self.filename)
+        file_path.touch(exist_ok=True)
 
-        if Path(self.filename).stat().st_size == 0:
+        if file_path.stat().st_size == 0:
             self.__save_config_to_file(is_template=True)
 
         self.__load_config_from_file()
