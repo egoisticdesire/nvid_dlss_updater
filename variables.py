@@ -4,6 +4,7 @@ F_BLUE = '[#2f6ed0]'
 F_GREEN = '[#1cc95a]'
 F_RED = '[#e94e39]'
 F_YELLOW = '[#e5c07b]'
+F_GREY = '[#595f6c]'
 S_RESET = '[/]'
 
 DEFAULT_META_FILENAME = '.\\meta.json'

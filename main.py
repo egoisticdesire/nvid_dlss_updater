@@ -33,7 +33,7 @@ def main():
             meta.config['download_path'],
             meta.config['dll_filename'],
         )
-        finder.find_file()
+        finder.find_and_replace_file()
 
     except FileNotFoundError:
         print(
