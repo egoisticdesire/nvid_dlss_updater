@@ -24,7 +24,6 @@ def main():
         extractor = Extractor(
             meta.config['download_path'],
             meta.config['zip_filename'],
-            meta.config['dll_filename'],
         )
         extractor.get_data_from_archive()
 

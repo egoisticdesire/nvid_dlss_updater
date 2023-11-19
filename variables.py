@@ -12,7 +12,9 @@ DEFAULT_DLSS_FILENAME = 'nvngx_dlss.dll'
 DEFAULT_DLSSD_FILENAME = 'nvngx_dlssd.dll'
 DEFAULT_DLSSG_FILENAME = 'nvngx_dlssg.dll'
 DEFAULT_DOWNLOADS_FOLDER = os.path.expandvars('%USERPROFILE%\\Downloads\\')
-DEFAULT_URL = 'https://www.techpowerup.com/download/nvidia-dlss-dll/'
+DEFAULT_DLSS_URL = 'https://www.techpowerup.com/download/nvidia-dlss-dll/'
+DEFAULT_DLSSD_URL = 'https://www.techpowerup.com/download/nvidia-dlss-3-ray-reconstruction-dll/'
+DEFAULT_DLSSG_URL = 'https://www.techpowerup.com/download/nvidia-dlss-3-frame-generation-dll/'
 
 CONFIG_TEMPLATE = {
     'title': '',

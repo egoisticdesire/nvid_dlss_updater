@@ -11,7 +11,7 @@ from variables import (CONFIG_TEMPLATE,
                        DEFAULT_DLSS_FILENAME,
                        DEFAULT_DOWNLOADS_FOLDER,
                        DEFAULT_META_FILENAME,
-                       DEFAULT_URL)
+                       DEFAULT_DLSS_URL)
 
 
 class Meta:
@@ -36,7 +36,7 @@ class Meta:
             {
                 'download_path': DEFAULT_DOWNLOADS_FOLDER,
                 'dll_filename': DEFAULT_DLSS_FILENAME,
-                'url': DEFAULT_URL,
+                'url': DEFAULT_DLSS_URL,
                 'root_path': self.__get_games_folder(),
                 'options': {
                     'accept': '*/*',
