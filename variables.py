@@ -1,18 +1,27 @@
 import os
 
-from colorama import Fore, Style
+F_BLUE = '[#2f6ed0]'
+F_GREEN = '[#1cc95a]'
+F_RED = '[#e94e39]'
+F_YELLOW = '[#e5c07b]'
+F_GREY = '[#595f6c]'
+S_RESET = '[/]'
 
-F_BLUE = Fore.BLUE
-F_GREEN = Fore.GREEN
-F_RED = Fore.RED
-F_YELLOW = Fore.YELLOW
-S_RESET = Style.RESET_ALL
-
-DEFAULT_META = '.\\meta.json'
-DEFAULT_DLL_FILENAME = 'nvngx_dlss.dll'
-DEFAULT_GAMES_FOLDER = 'D:\\GAMES\\'
+DEFAULT_META_FILENAME = '.\\meta.json'
+DEFAULT_DLSS_FILENAME = 'nvngx_dlss.dll'
+DEFAULT_DLSSD_FILENAME = 'nvngx_dlssd.dll'
+DEFAULT_DLSSG_FILENAME = 'nvngx_dlssg.dll'
 DEFAULT_DOWNLOADS_FOLDER = os.path.expandvars('%USERPROFILE%\\Downloads\\')
-DEFAULT_URL = 'https://www.techpowerup.com/download/nvidia-dlss-dll/'
+DEFAULT_DLSS_URL = 'https://www.techpowerup.com/download/nvidia-dlss-dll/'
+DEFAULT_DLSSD_URL = 'https://www.techpowerup.com/download/nvidia-dlss-3-ray-reconstruction-dll/'
+DEFAULT_DLSSG_URL = 'https://www.techpowerup.com/download/nvidia-dlss-3-frame-generation-dll/'
 
-GAMES_FOLDER_REQUESTED = False
-HEADLESS_MODE_REQUESTED = False
+CONFIG_TEMPLATE = {
+    'title': '',
+    'zip_filename': '',
+    'dll_filename': '',
+    'root_path': '',
+    'download_path': '',
+    'url': '',
+    'options': {}
+}
