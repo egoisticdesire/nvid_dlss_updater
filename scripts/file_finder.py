@@ -19,12 +19,15 @@ class FileFinder:
         self.__process_directory(self.start_directory)
 
     def __process_directory(self, directory: Path) -> None:
-        for item in directory.iterdir():
-            if item.is_dir():
-                self.__process_directory(item)
-            elif item.is_file() and item.name == self.dll_filename:
-                print(f'Файл {F_BLUE}{self.dll_filename}{S_RESET} найден в каталоге {F_YELLOW}[{directory}]')
-                self.__create_copy_and_replace(item)
+        try:
+            for item in directory.iterdir():
+                if item.is_dir():
+                    self.__process_directory(item)
+                elif item.is_file() and item.name == self.dll_filename:
+                    print(f'Файл {F_BLUE}{self.dll_filename}{S_RESET} найден в каталоге {F_YELLOW}[{directory}]')
+                    self.__create_copy_and_replace(item)
+        except PermissionError:
+            pass
 
     def __create_copy_and_replace(self, file_path: Path) -> None:
         copy_file_path = file_path.parent / self.copy_filename
