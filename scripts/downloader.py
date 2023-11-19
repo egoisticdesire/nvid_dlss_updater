@@ -1,61 +1,41 @@
-import os
 import sys
 import time
+from pathlib import Path
 
-import colorama
 import ujson
+from InquirerPy.base import Choice
+from rich import print
 from selenium import webdriver
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 
-from scripts.utility import Meta
-from variables import DEFAULT_META, F_BLUE, F_YELLOW, S_RESET
-
-colorama.init(autoreset=True)
+from scripts.metadata import prompt_choice_selection
+from variables import DEFAULT_META_FILENAME, F_GREEN, F_YELLOW, S_RESET
 
 
 class Downloader:
-    def __init__(self, webdriver_options: dict, download_path: str):
+    def __init__(self, webdriver_options: dict, download_path: str, meta_filename: str = DEFAULT_META_FILENAME, timeout: int = 60):
         self.webdriver_options = webdriver_options
         self.download_path = download_path
+        self.meta_filename = meta_filename
+        self.timeout = timeout
 
     def get_data(self, url: str, max_retries: int = 3) -> tuple:
         with self.__start_chrome_webdriver() as driver:
             try:
                 driver.get(url=url)
+                driver.maximize_window()
                 driver.implicitly_wait(10)
 
                 for _ in range(max_retries):
                     try:
-                        versions_list = driver.find_elements(
-                            by=By.CLASS_NAME,
-                            value='version',
-                        )
-
+                        versions_list = driver.find_elements(by=By.CLASS_NAME, value='version')
                         latest_version = versions_list[0]
-
-                        latest_version_title = latest_version.find_element(
-                            by=By.CLASS_NAME,
-                            value='title',
-                        ).text.strip()
-
-                        latest_version_filename = latest_version.find_element(
-                            by=By.CLASS_NAME,
-                            value='filename',
-                        ).text.strip()
-
+                        latest_version_title = latest_version.find_element(by=By.CLASS_NAME, value='title').text.strip()
+                        latest_version_filename = latest_version.find_element(by=By.CLASS_NAME, value='filename').text.strip()
                         self.__check_version(latest_version_title, latest_version_filename)
-
-                        latest_version.find_element(
-                            by=By.CLASS_NAME,
-                            value='download-version-form',
-                        ).click()
-
-                        driver.find_element(
-                            by=By.CLASS_NAME,
-                            value='closest',
-                        ).click()
-
+                        latest_version.find_element(by=By.CLASS_NAME, value='download-version-form').click()
+                        driver.find_element(by=By.CLASS_NAME, value='closest').click()
                         self.__check_file_download_status(latest_version_filename)
 
                         return latest_version_title, latest_version_filename
@@ -75,6 +55,9 @@ class Downloader:
 
     def __set_chrome_webdriver_options(self) -> webdriver.ChromeOptions:
         options = webdriver.ChromeOptions()
+        options.set_capability('browserVersion', '118')
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+
         webdriver_options = self.webdriver_options.items()
 
         for key, value in webdriver_options:
@@ -85,65 +68,60 @@ class Downloader:
 
         return options
 
-    def __check_version(self, version: str, zip_filename: str, meta_filename: str = DEFAULT_META) -> None:
+    def __check_version(self, version: str, zip_filename: str) -> None:
         version = version.lower()
         zip_filename = zip_filename.lower()
-        with open(meta_filename, 'r', encoding='utf-8') as file:
+
+        with open(self.meta_filename, 'r', encoding='utf-8') as file:
             data = ujson.load(file)
 
         if data['title'] != version or data['zip_filename'] != zip_filename:
-            print('\nЗагрузка файла...')
             data['title'] = version
             data['zip_filename'] = zip_filename
-            with open(meta_filename, 'w', encoding='utf-8') as file:
-                ujson.dump(data, file, indent=4, ensure_ascii=False)
+
+            with open(self.meta_filename, 'w', encoding='utf-8') as file:
+                ujson.dump(data, file, indent=4, ensure_ascii=False, escape_forward_slashes=False)
         else:
-            self.__get_user_choice(ver=data['title'])
+            self.__get_user_choice(version=data['title'])
 
-    def __check_file_download_status(self, downloaded_file: str, wait_time: int = 60, file_exists: bool = False):
-        download_fullpath = os.path.join(self.download_path, downloaded_file)
+    def __check_file_download_status(self, downloaded_file: str) -> None:
+        download_fullpath = Path(self.download_path) / downloaded_file
+        time_left = self.timeout
 
-        while wait_time > 0:
-            if os.path.exists(download_fullpath):
-                file_exists = True
-                break
+        while time_left > 0:
+            if download_fullpath.exists():
+                print(f'\nФайл успешно загружен: {F_YELLOW}[{download_fullpath}]\n')
+                return
+
             time.sleep(1)
-            wait_time -= 1
+            time_left -= 1
 
-            if not wait_time:
-                wait_time = self.__get_user_choice(timeout=True)
+            if not time_left:
+                self.__get_user_choice(timeout=True)
 
-        if file_exists:
-            print(f'Файл успешно загружен: {F_YELLOW}[{download_fullpath}]\n')
+    def __get_user_choice(self, timeout: bool = False, version: str = '') -> int:
+        choices_items = {'Да': True, 'Нет': False}
+        choices = [Choice(value=value, name=key) for key, value in choices_items.items()]
 
-    @staticmethod
-    def __get_user_choice(timeout: bool = False, ver: str = '') -> int:
+        def transformer(result: str) -> str:
+            if result.lower() == 'да':
+                return 'Пожалуйста, подождите...'
+            return 'Выполнение прервано пользователем'
+
         while True:
             if timeout:
-                answer = input('Время ожидания превышено\nФайл не загружен, подождать? (Y/n): ')
-                if answer.lower() == 'n' or answer.lower() == 'exit':
-                    print('\nЗагрузка прервана\nВыполнение программы остановлено пользователем')
-                    sys.exit(0)
-                elif answer.lower() == 'y' or answer == '':
-                    print('\nПродолжается загрузка файла...\n')
-                    wait_time = 60
-                    return wait_time
+                message = 'Файл загружается долго. Желаете подождать? '
+                answer = prompt_choice_selection(choices=choices, transformer=transformer, message=message)
+                if answer:
+                    return self.timeout
                 else:
-                    print('Некорректный ввод\n')
+                    sys.exit(0)
 
-            answer = input(f'Текущая версия {F_BLUE}{ver.upper()}{S_RESET} является актуальной. Продолжить? (y/N): ')
-            if answer.lower() == 'n' or answer.lower() == 'exit' or answer == '':
-                print('\nОбновление не требуется\nВыполнение программы остановлено пользователем')
-                sys.exit(0)
-            elif answer.lower() == 'y':
-                print('\nЗагрузка файла...')
-                break
-            else:
-                print('\nНекорректный ввод!\n')
-
-
-if __name__ == '__main__':
-    meta = Meta()
-    config = meta.create_metadata()
-    downloader = Downloader(config['options'], config['download_path'])
-    downloader.get_data(config['url'])
+            if version:
+                print(f'\nТекущая версия {F_GREEN}{version.upper()}{S_RESET} является актуальной.')
+                message = 'Всё равно продолжить? '
+                answer = prompt_choice_selection(choices=choices, transformer=transformer, message=message, default=False)
+                if answer:
+                    break
+                else:
+                    sys.exit(0)

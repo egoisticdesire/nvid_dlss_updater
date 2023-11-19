@@ -1,3 +1,5 @@
+import sys
+
 from InquirerPy.base import Choice
 from rich import print
 
@@ -17,9 +19,15 @@ def main():
             meta.config['options'],
             meta.config['download_path'],
         )
-        meta.update_config_metadata(
-            *downloader.get_data(meta.config['url'])
-        )
+        meta_update = downloader.get_data(meta.config['url'])
+
+        if None not in meta_update:
+            meta.update_config_metadata(
+                *meta_update
+            )
+        else:
+            print(f'{F_RED}Скачивание не удалось. Ошибка при парсинге данных')
+            sys.exit(0)
 
         extractor = Extractor(
             meta.config['download_path'],
@@ -44,7 +52,7 @@ def main():
             f"\tzip_filename = {meta.config['zip_filename']}\n"
         )
 
-    finally:
+    else:
         patterns = ['*.tmp', '*.crdownload']
         choices_items = {'Да': True, 'Нет': False}
         choices = [Choice(value=value, name=key) for key, value in choices_items.items()]
