@@ -9,7 +9,7 @@ class Extractor:
         self.zip_path = zip_path
         self.zip_fullpath = Path(self.zip_path) / zip_filename
 
-    def get_data_from_archive(self):
+    def get_data_from_archive(self) -> None:
         with zipfile.ZipFile(str(self.zip_fullpath), 'r', metadata_encoding='utf-8') as zip_file:
             zip_file.extractall(self.zip_path)
 
